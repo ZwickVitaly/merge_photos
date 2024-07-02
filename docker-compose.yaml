@@ -1,0 +1,29 @@
+services:
+  nginx:
+      container_name: nginx
+      restart: on-failure
+      image: nginx
+      ports:
+        - "80:80"
+      volumes:
+        - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+        - ./logs/nginx:/var/log/nginx
+        - ./media:/www/data/media
+      depends_on:
+        fastapi_images:
+          condition: service_started
+
+  fastapi_images:
+    container_name: fastapi_images
+    build:
+      dockerfile: ./Dockerfile
+    command:
+      - "uvicorn"
+      - "main:app"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8080"
+    restart: on-failure
+    volumes:
+      - ./media:/media
