@@ -20,9 +20,6 @@ async def browse_ya_disk(search_params: SearchParams, request: Request):
     Кидай ссылку на яндекс-диск, получи картинки, сшитые в разные tiff-файлы по папкам.
     Обрати внимание на доп. параметры
      !!! Диск должен быть публичным !!!
-    :param search_params: Схема SearchParams
-    :param request:
-    :return: FinalLink | ErrorResponse
     """
     logger.debug(f"User request url: {search_params.disk_url}")
     filename = f"{str(uuid4())}.tiff"
