@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <title>Photo merge</title>
+    <style>
+        .custom-title {
+            text-align: center;
+            font-weight: bold;
+        }
+        #spinner {
+        display: none;
+        }
+        .loading {
+            border: 2px solid #ccc;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border-top-color: #1ecd97;
+            border-left-color: #1ecd97;
+            animation: spin 1s infinite ease-in;
+            margin: auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+       <div class="row">
+           <div class="cold-md-3"></div>
+           <div class="cold-md-6">
+               <div class="card-header">
+                    Кидай ссылку на ПУБЛИЧНЫЙ Яндекс-диск, получай ссылку на .tiff-коллекцию изображений из диска.
+               </div>
+               <div class="card-body">
+                   <div class="form-group">
+                       <label>Ссылка:</label>
+                       <input type="text" class="form-control" name="disk_url" id="disk_url" placeholder="https://disk.yandex.ru/d/...">
+                   </div>
+                   <div class="form-group">
+                        <label>Папки:</label>
+                       <input type="text" class="form-control" name="searched_dirs" id="searched_dirs" placeholder="Названия папок через '/' (можно оставить пустым)">
+                   </div>
+                   <div class="form-group">
+                        <label>Длина ряда:</label>
+                       <input type="text" class="form-control" name="row_len" id="row_len" placeholder="1+ (можно оставить пустым, будет высчитано автоматически)">
+                   </div>
+                   <div class="form-group">
+                        <label>Ширина каждой картинки (в пикселях):</label>
+                       <input type="text" class="form-control" name="width" id="width" placeholder="1-1600 (можно оставить пустым, по умолчанию 400)">
+                   </div>
+                   <div class="form-group">
+                        <label>Высота каждой картинки (в пикселях):</label>
+                       <input type="text" class="form-control" name="height" id="height" placeholder="1-1600 (можно оставить пустым, по умолчанию 400)">
+                   </div>
+                   <div class="form-group">
+                        <label>Расстояние между картинками (в пикселях):</label>
+                       <input type="text" class="form-control" name="gap" id="gap" placeholder="0-100 (можно оставить пустым, по умлочанию 25)">
+                   </div>
+                   <div class="form-group">
+                        <label>RGB цвет заднего фона:</label>
+                       <input type="text" class="form-control" name="bg_color" id="bg_color" placeholder="0-255, 0-255, 0-255 (можно оставить пустым, по умолчанию белый (255, 255, 255))">
+                   </div>
+                   <div class="form-group">
+                        <label>Максимальное число картинок на одном листе:</label>
+                       <input type="text" class="form-control" name="max_images_per_page" id="max_images_per_page" placeholder="1-100 (можно оставить пустым, по умолчанию 25)">
+                   </div>
+                   <div class="form-group">
+                       <button class="btn btn-warning" id="clearBtn">Очистить</button>
+                       <button class="btn btn submit" id="submitBtn" onclick="spinner()">Сгенерировать</button>
+                       <div class="loader" id="spinner">
+                              <div class="loading">
+                              </div>
+                       </div>
+                   </div>
+               </div>
+               <div class="card-footer">
+                    <div id="response">
+
+                    </div>
+               </div>
+           </div>
+
+       </div>
+    </div>
+    <script>
+        $("#submitBtn").click(function(){
+            var disk_url = $("#disk_url").val() || null;
+            if (disk_url == null){
+                stopSpinner();
+                alert("Ссылка на диск не должна быть пустой");
+                return;
+            };
+            var searched_dirs = $('#searched_dirs').val() || null;
+            var row_len = $("#row_len").val() || 0;
+            if (row_len) {
+                row_len = parseInt(row_len);
+                if (isNaN(row_len)) {
+                    stopSpinner();
+                    alert("Длина ряда должна быть целым числом")
+                    return;
+                };
+            };
+            var width = $("#width").val() || null;
+            if (width) {
+                width = parseInt(width);
+                if (isNaN(width)) {
+                    stopSpinner();
+                    alert("Ширина должна быть целым числом")
+                    return;
+                };
+            };
+            var height = $("#height").val() || null;
+            if (height) {
+                height = parseInt(height);
+                if (isNaN(height)) {
+                    stopSpinner();
+                    alert("Высота должна быть целым числом")
+                    return;
+                };
+            };
+            var gap = $("#gap").val() || null;
+            if (gap) {
+                gap = parseInt(gap);
+                if (isNaN(gap)) {
+                    stopSpinner();
+                    alert("Разрыв должен быть целым числом")
+                    return;
+                };
+            };
+            var bg_color = $("#bg_color").val() || null;
+            var max_images_per_page = $("#max_images_per_page").val() || null;
+            if (max_images_per_page) {
+                max_images_per_page = parseInt(max_images_per_page);
+                if (isNaN(max_images_per_page)) {
+                    stopSpinner();
+                    alert("Максимальное количество изображений должно быть целым числом")
+                    return;
+                };
+            };
+            if (searched_dirs) {
+                searched_dirs = searched_dirs.split("/");
+            };
+            if (bg_color) {
+                bg_color = bg_color.split(", ");
+                if (bg_color.length != 3) {
+                    stopSpinner();
+                    alert("Неправильный формат RGB фона");
+                    return;
+                };
+
+                bg_color_check = bg_color.map((x) => parseInt(x));
+                for (var x in bg_color_check) {
+                    if (isNaN(bg_color_check[x])) {
+                        stopSpinner();
+                        alert('Неправильное число в RGB: ' + bg_color[x]);
+                        return;
+                    };
+                };
+            };
+            var sending = {
+                disk_url: disk_url,
+                searched_dirs: searched_dirs,
+                row_len: row_len,
+                width: width,
+                height: height,
+                gap: gap,
+                bg_color: bg_color,
+                max_images_per_page: max_images_per_page
+            }
+            sending = JSON.stringify(sending)
+            $.ajax({
+                url: window.location.href + "api/make-tiff",
+                type: "POST",
+                data: sending,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function(response){
+                    stopSpinner();
+                    alert("Ссылка для скачивания готова!");
+                    $("#response").html("<div class='alert alert-success'>Сылка для скачивания: <a href='"+response.link+"' target='_blank'>"+response.link+"</a></div>");
+                },
+                error: function(xhr, status, error, response) {
+                    stopSpinner();
+                    if (xhr.responseJSON.error == "No images found") {
+                        alert("Не найдено указанных папок или изображений в них");
+                    } else if (xhr.responseJSON.error == "Invalid Disk link!"){
+                        alert("Неправильная ссылка на диск. (может быть диск не опубликован?)");
+                    } else if (xhr.responseJSON.error == "Empty folder"){
+                        alert("В папке по основной ссылке нет ни папок ни изображений");
+                    } else if (xhr.responseJSON.error == "Yandex disk responded with bad json"){
+                        alert("Сервис яндекс-диска пока-что недоступен.")
+                    } else {
+                        alert("Что-то пошло не так.")
+                    };
+                }
+            });
+        })
+        function spinner() {
+            document.getElementById("spinner").style.display = "block";
+            $("#response").html("");
+        }
+        function stopSpinner() {
+            document.getElementById("spinner").style.display = "none";
+        }
+
+    </script>
+</body>
+</html>

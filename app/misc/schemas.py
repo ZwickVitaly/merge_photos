@@ -27,7 +27,7 @@ class SearchParams(BaseModel):
     )
     bg_color: tuple[int, int, int] | None = Field(default=(255, 255, 255), description="Цвет заднего фона в RGB")
     max_images_per_page: int | None = Field(
-        default=40, ge=1, le=100, description="Максимальное количество изображений на странице. 1-100"
+        default=25, ge=1, le=100, description="Максимальное количество изображений на странице. 1-100"
     )
 
 

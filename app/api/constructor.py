@@ -14,7 +14,7 @@ image_downloader = ImageDownloader()
 tiff_maker = TiffMaker()
 
 
-@app.post("/make-tiff", responses={200: {"model": FinalLink}, 401: {"model": ErrorResponse}})
+@app.post("/api/make-tiff", responses={200: {"model": FinalLink}, 400: {"model": ErrorResponse}})
 async def browse_ya_disk(search_params: SearchParams, request: Request):
     """
     Кидай ссылку на яндекс-диск, получи картинки, сшитые в разные tiff-файлы по папкам.
@@ -22,20 +22,20 @@ async def browse_ya_disk(search_params: SearchParams, request: Request):
      !!! Диск должен быть публичным !!!
     """
     logger.debug(f"User request url: {search_params.disk_url}")
+    url = f"http://{request.url.hostname}"
     filename = f"{str(uuid4())}.tiff"
     try:
         links = await parser.get_image_urls(search_params.disk_url, search_params.searched_dirs)
         images = await image_downloader.download_images(links=links)
         if not links:
-            return JSONResponse(status_code=401, content={"error": "No images found"})
+            return JSONResponse(status_code=400, content={"error": "No images found"})
         await tiff_maker.make_tiff(
             images,
             filename,
             **search_params.model_dump(exclude={"disk_url", "searched_dirs"}, exclude_none=True)
         )
         logger.info(f"Successfully made {filename} file")
-        return FinalLink(link=f"{request.url.netloc}/media/{filename}")
+        return FinalLink(link=f"{url}/media/{filename}")
     except Exception as e:
         logger.error(f"{e}")
-        return JSONResponse(status_code=401, content={"error": str(e.args[0])})
-
+        return JSONResponse(status_code=400, content={"error": str(e.args[0])})

@@ -24,7 +24,7 @@ class YandexDiskImagesParser:
             async with session.get(self.API_GET_URL, params=params) as request:
                 if request.status != 200:
                     if counter == 1:
-                        raise InvalidDiskLink(f"Invalid Disk link! {params['public_key']}")
+                        raise InvalidDiskLink(f"Invalid Disk link!")
                     else:
                         return []
                 images = []
@@ -53,7 +53,7 @@ class YandexDiskImagesParser:
                 except JSONDecodeError:
                     logger.error("Site responded with invalid json")
                     if counter == 1:
-                        raise
+                        raise ValueError("Yandex disk responded with bad json")
                 images.extend(folders)
                 return images
 

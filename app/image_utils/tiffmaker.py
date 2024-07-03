@@ -18,7 +18,7 @@ class TiffMaker:
             height: int = 400,
             gap: int = 50,
             bg_color: tuple[int, int, int] = (255, 255, 255),
-            max_images_per_page: int = 40,
+            max_images_per_page: int = 25,
     ):
         logger.debug("Getting frames")
         frames = []
@@ -45,7 +45,7 @@ class TiffMaker:
             height: int = 400,
             gap: int = 50,
             bg_color: tuple[int, int, int] = (255, 255, 255),
-            max_images: int = 40,
+            max_images: int = 25,
     ):
         logger.debug("Merging frames")
         if len(images) > max_images:
@@ -88,7 +88,7 @@ class TiffMaker:
             height: int = 400,
             gap: int = 50,
             bg_color: tuple[int, int, int] = (255, 255, 255),
-            max_images_per_page: int = 40,
+            max_images_per_page: int = 25,
     ):
         images_for_frames = await self.get_frames(
             links,
